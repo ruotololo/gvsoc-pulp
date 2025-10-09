@@ -93,9 +93,8 @@ class Cluster(st.Component):
         first_external_pcer = 12
         has_ne16 = False       # Because RedMulE is alternative to NE16!!
 
-        has_redmule = self.declare_user_property(
-            name='redmule', value=False, cast=bool, description='Enable Redmule'
-        )
+        #ask if needed
+        has_redmule = False # TODO: quickfix
 
 
         #
