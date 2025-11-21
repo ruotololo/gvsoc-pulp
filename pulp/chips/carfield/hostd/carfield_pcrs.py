@@ -26,3 +26,6 @@ class PlatformControlRegs(gvsoc.systree.Component):
 
     def i_INPUT(self) -> gvsoc.systree.SlaveItf:
         return gvsoc.systree.SlaveItf(self, 'input', signature='io')
+
+    def o_OUT(self, itf: gvsoc.systree.SlaveItf):
+        self.itf_bind('out', itf, signature='io')
