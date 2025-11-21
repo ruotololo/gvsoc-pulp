@@ -50,6 +50,7 @@ class PlatformControlRegs : public vp::Component
     vp::IoReqStatus handle_boot_enable(bool is_write, uint32_t *data);
     vp::IoReqStatus handle_busy(bool is_write, uint32_t *data);
     vp::IoReqStatus handle_eoc(bool is_write, uint32_t *data);
+    vp::IoReqStatus handle_get_return(bool is_write, uint32_t *data);
     // Isolate and clock handlers for each domain
     vp::IoReqStatus handle_isolate(uint64_t offset, bool is_write, uint32_t *data);
     vp::IoReqStatus handle_clk_enable(uint64_t offset, bool is_write, uint32_t *data);
@@ -62,6 +63,7 @@ class PlatformControlRegs : public vp::Component
 
     vp::Trace trace;
     vp::IoSlave in;
+    vp::IoMaster out;
 };
 
 PlatformControlRegs::PlatformControlRegs(vp::ComponentConf &config) : vp::Component(config)
@@ -69,6 +71,7 @@ PlatformControlRegs::PlatformControlRegs(vp::ComponentConf &config) : vp::Compon
     this->traces.new_trace("trace", &trace, vp::DEBUG);
     this->in.set_req_meth(&PlatformControlRegs::req);
     this->new_slave_port("input", &this->in);
+    this->new_master_port("out", &this->out);
 }
 
 void PlatformControlRegs::reset(bool active)
@@ -79,19 +82,19 @@ void PlatformControlRegs::reset(bool active)
         this->pulp_cluster_regs.busy         = 0;
         this->pulp_cluster_regs.eoc          = 0;
 
-    this->isolate_regs.periph = 0;
-    this->isolate_regs.safety_island = 0;
+        this->isolate_regs.periph          = 0;
+        this->isolate_regs.safety_island   = 0;
     this->isolate_regs.security_island = 0;
-    this->isolate_regs.pulp_cluster = 0;
-    this->isolate_regs.spatz_cluster = 0;
-    this->isolate_regs.l2 = 0;
+        this->isolate_regs.pulp_cluster    = 0;
+        this->isolate_regs.spatz_cluster   = 0;
+        this->isolate_regs.l2              = 0;
 
-        this->clock_regs.periph = 0;
-        this->clock_regs.safety_island = 0;
+        this->clock_regs.periph          = 0;
+        this->clock_regs.safety_island   = 0;
         this->clock_regs.security_island = 0;
-        this->clock_regs.pulp_cluster = 0;
-        this->clock_regs.spatz_cluster = 0;
-        this->clock_regs.l2 = 0;
+        this->clock_regs.pulp_cluster    = 0;
+        this->clock_regs.spatz_cluster   = 0;
+        this->clock_regs.l2              = 0;
     }
 }
 

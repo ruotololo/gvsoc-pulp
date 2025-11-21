@@ -165,6 +165,8 @@ class Soc(st.Component):
             pulpd_size = pulp_cluster.get_property('mapping/size')
     
             # Host -> Pulpd
+            # Forward PlatformControlRegs master port to the main router
+            self.bind(car_regs, 'out', self, 'to_pulpd')
             narrow_axi.add_mapping(name='pulp_cluster', base=pulpd_base, size=pulpd_size)
             self.bind(narrow_axi, 'pulp_cluster', self, 'to_pulpd')
             
