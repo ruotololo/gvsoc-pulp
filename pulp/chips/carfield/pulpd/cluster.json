@@ -3,7 +3,7 @@
     "alias": "0x00000000",
     "mapping": {
         "base": "0x50000000",
-        "size": "0x00800000"
+        "size": "0x00400000"
     },
 
     "version": 5,
@@ -27,7 +27,7 @@
     "l1": {
         "mapping": {
             "base": "0x50000000",
-            "size": "0x00010000",
+            "size": "0x00040000",
             "remove_offset": "0x50000000"
         },
         "ts_mapping": {
