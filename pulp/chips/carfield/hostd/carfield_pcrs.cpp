@@ -50,7 +50,6 @@ class PlatformControlRegs : public vp::Component
     vp::IoReqStatus handle_boot_enable(bool is_write, uint32_t *data);
     vp::IoReqStatus handle_busy(bool is_write, uint32_t *data);
     vp::IoReqStatus handle_eoc(bool is_write, uint32_t *data);
-    vp::IoReqStatus handle_get_return(bool is_write, uint32_t *data);
     // Isolate and clock handlers for each domain
     vp::IoReqStatus handle_isolate(uint64_t offset, bool is_write, uint32_t *data);
     vp::IoReqStatus handle_clk_enable(uint64_t offset, bool is_write, uint32_t *data);
@@ -84,7 +83,7 @@ void PlatformControlRegs::reset(bool active)
 
         this->isolate_regs.periph          = 0;
         this->isolate_regs.safety_island   = 0;
-    this->isolate_regs.security_island = 0;
+        this->isolate_regs.security_island = 0;
         this->isolate_regs.pulp_cluster    = 0;
         this->isolate_regs.spatz_cluster   = 0;
         this->isolate_regs.l2              = 0;
@@ -159,9 +158,20 @@ vp::IoReqStatus PlatformControlRegs::handle_fetch_enable(bool is_write, uint32_t
 {
     trace.msg("Accessing PULP_CLUSTER_FETCH_ENABLE (is_write: %d, value: 0x%x)\n", is_write, *data);
     if (is_write) {
-        pulp_cluster_regs.fetch_enable = *data;
+        vp::IoReq *req = this->out.req_new(0x50200000 + 0x08, (uint8_t *)data, 4, true); // TODO: use defined offset
+        vp::IoReqStatus err = this->out.req(req);
+        if (err != vp::IO_REQ_OK)
+        {
+            this->trace.warning("Failed to forward fetch enable request (err: %d)\n", err);
+            // If forwarding fails, keep the local register updated but warn.
+        }
     } else {
-        *data = pulp_cluster_regs.fetch_enable;
+        vp::IoReq *req = this->out.req_new(0x50200000 + 0x08, (uint8_t *)data, 4, false); // TODO: use defined offset
+        vp::IoReqStatus err = this->out.req(req);
+        if (err != vp::IO_REQ_OK)
+        {
+            this->trace.warning("Failed to forward fetch enable request (err: %d)\n", err);
+        }
     }
     return vp::IO_REQ_OK;
 }
@@ -192,9 +202,21 @@ vp::IoReqStatus PlatformControlRegs::handle_eoc(bool is_write, uint32_t *data)
 {
     trace.msg("Accessing PULP_CLUSTER_EOC (is_write: %d, value: 0x%x)\n", is_write, *data);
     if (is_write) {
-        pulp_cluster_regs.eoc = *data;
+        // TODO: only enabling first PE
+        vp::IoReq *req = this->out.req_new(0x50200000 + 0x00, (uint8_t *)data, 4, true); // TODO: use defined offset
+        vp::IoReqStatus err = this->out.req(req);
+        if (err != vp::IO_REQ_OK)
+        {
+            this->trace.warning("Failed to forward fetch enable request (err: %d)\n", err);
+            // If forwarding fails, keep the local register updated but warn.
+        }
     } else {
-        *data = pulp_cluster_regs.eoc;
+        vp::IoReq *req = this->out.req_new(0x50200000 + 0x00, (uint8_t *)data, 4, false); // TODO: use defined offset
+        vp::IoReqStatus err = this->out.req(req);
+        if (err != vp::IO_REQ_OK)
+        {
+            this->trace.warning("Failed to forward fetch enable request (err: %d)\n", err);
+        }
     }
     return vp::IO_REQ_OK;
 }
