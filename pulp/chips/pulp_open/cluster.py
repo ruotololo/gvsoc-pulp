@@ -25,6 +25,7 @@ from pulp.timer.timer_v2 import Timer
 from pulp.cluster.cluster_control_v2 import Cluster_control
 from pulp.ne16.ne16 import Ne16
 from pulp.icache_ctrl.icache_ctrl_v2 import Icache_ctrl
+from pulp.stdout.stdout_v3 import Stdout
 
 from pulp.redmule.redmule import RedMule
 
@@ -197,6 +198,11 @@ class Cluster(st.Component):
 
         cluster_ico.add_mapping('periph_ico_alias', **cluster_conf.get_property('peripherals/alias'), add_offset=int(cluster_conf.get_property('peripherals/mapping/base'), 0) - int(cluster_conf.get_property('peripherals/alias/base'), 0))
         self.bind(cluster_ico, 'periph_ico_alias', periph_ico, 'input')
+
+        # Stdout for cluster
+        stdout = Stdout(self, 'stdout')
+        cluster_ico.add_mapping('stdout', base=0x03002000, size=0x00001000)
+        self.bind(cluster_ico, 'stdout', stdout, 'input')
 
         # Periph interconnect
         periph_ico.add_mapping('error', **self._reloc_mapping(cluster_conf.get_property('mapping')))

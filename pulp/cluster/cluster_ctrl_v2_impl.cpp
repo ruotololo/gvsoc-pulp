@@ -56,6 +56,8 @@ private:
   vp::IoReqStatus dbg_halt_status_req(bool is_write, uint32_t *data);
   vp::IoReqStatus dbg_halt_mask_req(bool is_write, uint32_t *data);
   vp::IoReqStatus bootaddr_req(int core, bool is_write, uint32_t *data);
+  vp::IoReqStatus return_value_req(bool is_write, uint32_t *data);
+  vp::IoReqStatus eoc_req(bool is_write, uint32_t *data);
   void check_dbg_halt();
 
   vp::Trace     trace;
@@ -66,6 +68,8 @@ private:
   uint32_t dbg_halt_mask;
   uint32_t dbg_halt_status;
   uint32_t dbg_halt_status_sync;
+  uint32_t return_value;
+  uint32_t eoc;
 };
 
 cluster_ctrl::cluster_ctrl(vp::ComponentConf &config)
@@ -140,7 +144,14 @@ vp::IoReqStatus cluster_ctrl::req(vp::Block *__this, vp::IoReq *req)
   {
     return _this->dbg_halt_mask_req(is_write, (uint32_t *)data);
   }
-
+  else if (offset == 0x100) // TODO: define ARCHI_CLUSTER_CTRL_GET_RETURN
+  {
+    return _this->return_value_req(is_write, (uint32_t *)data);
+  }
+  else if (offset == ARCHI_CLUSTER_CTRL_EOC)
+  {
+    return _this->eoc_req(is_write, (uint32_t *)data);
+  }
 
   vp_warning_always(&_this->trace, "Invalid access\n");
 
@@ -252,7 +263,33 @@ vp::IoReqStatus cluster_ctrl::bootaddr_req(int core, bool is_write, uint32_t *da
   return vp::IO_REQ_OK;
 }
 
+vp::IoReqStatus cluster_ctrl::return_value_req(bool is_write, uint32_t *data)
+{
+  if (is_write)
+  {
+    this->trace.msg("Setting return value (value: 0x%x)\n", *data);
+    this->return_value = *data;
+  }
+  else
+  {
+    *data = this->return_value;
+  }
+  return vp::IO_REQ_OK;
+}
 
+vp::IoReqStatus cluster_ctrl::eoc_req(bool is_write, uint32_t *data)
+{
+  if (is_write)
+  {
+    this->trace.msg("Setting EOC (value: 0x%x)\n", *data);
+    this->eoc = *data;
+  }
+  else
+  {
+    *data = this->eoc;
+  }
+  return vp::IO_REQ_OK;
+}
 
 void cluster_ctrl::halt_status_sync(vp::Block *__this, bool status, int id)
 {
